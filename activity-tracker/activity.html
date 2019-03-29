@@ -6,109 +6,234 @@
     <script src="https://unpkg.com/vue@2.6.7/dist/vue.js"></script>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-        crossorigin="anonymous">
+          crossorigin="anonymous">
     <link rel="stylesheet" href="practice_style.css" type="text/css">
 </head>
 
 <body>
-    <div id="app">
+<div id="app">
 
-        <!-- TODO change header text to include name of activity -->
-        <h1 class="text-center">Time Tracker</h1>
+    <!-- TODO change header text to include name of activity -->
+    <h1 class="text-center">{{activity}}! Time Tracker</h1>
 
-        <div id="add-hours" class="card">
+    <div id="add-hours" class="card">
 
-            <h2 class="card-header">Add Hours</h2>
-            <div class="card-body">
+        <h2 class="card-header">Add Hours</h2>
+        <div class="card-body">
 
-                <form>
+            <form>
 
-                    <!-- TODO show error alert with list of errors,
-                         if there are errors in the form -->
-                    
-                    <div class="form-group">
-                        <!-- TODO change label message to include name of activity -->
-                        <label class="form-label" for="when">When did you do this activity?</label>
-                        <!-- TODO v-model to app data property -->
-                        <input id="when" class="form-control" type="date" >
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="howLong">How long did you practice for?</label>
-                        <!-- TODO v-model to app data property -->
-                        <input id="howLong" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="type">What type?</label>
-                        <!-- TODO create a select. v-model type -->
-                        <!-- TODO create one option for each type  -->
-                        </select>
-                    </div>
-
-                    <div class="form-check-inline">
-                        <!-- TODO v-model, v-bind value -->
-                        <input id="v2" class="form-check-input" type="radio">
-                        <label class="form-check-label" for="v1">Traditional</label>
-                    </div>
-
-                    <div class="form-check-inline">
-                        <!-- TODO v-model, v-bind value -->
-                        <input id="v1" class="form-check-input" type="radio">
-                        <label class="form-check-label" for="v1">Digital</label>
-                    </div>
-
-                    <div>
-                        <!-- TODO v-on click event -->
-                        <button class="btn btn-primary mt-2" type="button" >Add record</button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="card-header">Activity Record</h2>
-
-            <div class="card-body">
-                <!-- TODO display the number of records  -->
-                <h3> TODO how many records?</h3>
-
-                <div id="records">
-                    <table class="table">
-                        <tr>
-                            <th>When</th>
-                            <th>How long?</th>
-                            <th>Type</th>
-                            <th>Digital or traditional?</th>
-                        </tr>
-                        <!-- TODO display one table row for each activityRecord  -->
-                    </table>
+                <!-- TODO show error alert with list of errors,
+                     if there are errors in the form -->
+                <div class="alert alert-danger"  v-show="errors && errors.length>0">
+                    <li v-for="error in errors">{{error}}</li>
                 </div>
+
+                <div class="form-group">
+                    <!-- TODO change label message to include name of activity -->
+                    <label class="form-label" for="when">When did you {{activity|lowercase}} do this activity?</label>
+                    <!-- TODO v-model to app data property -->
+                    <input id="when" class="form-control" type="date" v-model.lazy="when">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="howLong">How long did you practice for,in hours?</label>
+                    <!-- TODO v-model to app data property -->
+                    <input id="howLong" class="form-control" v-model.number.lazy="howLong">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="type">What type?</label>
+                    <!-- TODO create a select. v-model type -->
+                    <!-- TODO create one option for each type  -->
+                    <select class="form-control" v-model="type">
+                        <option v-for="type in types" v-bind:value="type">{{type}}</option>
+                    </select>
+                </div>
+
+                <div class="form-check-inline">
+                    <!-- TODO v-model, v-bind value -->
+                    <input id="v2" class="form-check-input" type="radio" v-bind:value="traditional" v-model="digitalTraditional">
+                    <label class="form-check-label" for="v1">{{traditional}}</label>
+                </div>
+
+
+                <div class="form-check-inline">
+                    <!-- TODO v-model, v-bind value -->
+                    <input id="v1" class="form-check-input" type="radio" v-bind:value="digital" v-model="digitalTraditional">
+                    <label class="form-check-label" for="v1">{{digital}}</label>
+                </div>
+
+<br>
+                <br>
+                <div class="form-check-progress">
+                    <label class="form-check" for="doneWIP">Are you completed?</label>
+                    <div class="form-check-inline">
+                        <!-- TODO v-model, v-bind value -->
+                        <input id="v4" class="form-check-input" type="radio"v-bind:value="done" v-model="doneWIP">
+                        <label class="form-check-label" for="v3">{{done}}</label>
+                    </div>
+
+                    <div class="form-check-inline">
+                        <!-- TODO v-model, v-bind value -->
+                        <input id="v3" class="form-check-input" type="radio"v-bind:value="WIP" v-model="doneWIP">
+                        <label class="form-check-label" for="v3">{{WIP}}</label>
+                    </div>
+
+                <br>
+
+                <input v-model="notes" placeholder="Please enter the notes, if necessary">
+
+                <div>
+                    <!-- TODO v-on click event -->
+                    <button class="btn btn-primary mt-2" type="button" v-on:click="submit" >Add record</button>
+                </div>
+
+
+    <div class="card">
+        <h2 class="card-header">Activity Record</h2>
+
+        <div class="card-body">
+            <!-- TODO display the number of records  -->
+            <h3> {{activityRecords.length}} record(s)</h3>
+
+            <div id="records">
+                <table class="table">
+                    <tr>
+                        <th>When</th>
+                        <th>How long?</th>
+                        <th>Type</th>
+                        <th>Digital or traditional?</th>
+                        <th>Completed?</th>
+                        <th>Any notes?</th>
+                    </tr>
+                    <!-- TODO display one table row for each activityRecord  -->
+                    <tr v-for="record in activityRecords" v-bind:class="'format-'+record.type">
+                        <td>{{record.when|shortDateFormat}}</td>
+                        <td>{{record.howLong|decimalPlaces(2)}}</td>
+                        <td>{{record.type}}</td>
+                        <td>{{record.digitalTraditional}}</td>
+                        <td>{{record.doneWIP}}</td>
+                        <td>{{record.notes|shortNotes}}</td>
+                    </tr>
+                </table>
             </div>
         </div>
-
-
-        <div class="card">
-            <h2 class="card-header">Summary</h2>
-
-            <div class="card-body">
-                <!-- TODO use computed property to display total hours -->
-                <p>You have practiced a total of TODO hours, broken down as follows:</p>
-                
-                <!-- TODO computed property to display total for each type  -->
-                <p>TODO total for each type</p>
-                
-            </div>
-        </div>
-
     </div>
 
-    <script>
 
-      // TODO create vue app here 
+    <div class="card">
+        <h2 class="card-header">Summary</h2>
 
-    </script>
+        <div class="card-body">
+            <!-- TODO use computed property to display total hours -->
+            <p>You have practiced a total of {{totalHours}} hours, broken down as follows:</p>
+
+            <!-- TODO computed property to display total for each type  -->
+           <ul class="list-group list-group-flush">
+               <li class="list-group-item" v-for="hours,type in totalHoursByType">{{type}}:{{hours}}</li>
+           </ul>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // TODO create vue app here
+    let app=new Vue({
+        el:"#app",
+        data:{
+            activity:'Practice Art',
+            when:'',
+            howLong:1,
+            type:'sketching',
+            digitalTraditional:'traditional',
+            doneWIP:'done',
+            activityRecords:[],
+            types:['sketching','painting','drawing'],
+            digital:'digital',
+            traditional:'traditional',
+            done:'yes',
+            WIP:'no',
+            notes:'',
+            errors:[]
+        },
+        computed:{
+            whenLocal(){
+                let date=new Date(this.when)
+                let timestamp=date.getTime()+(date.getTimezoneOffset() * 60*1000)
+                let localDate=new Date(timestamp)
+                return localDate
+            },
+            totalHours(){
+                let total=0
+                if(this.activityRecords.length>0){
+                    total=this.activityRecords.reduce(function(hoursAccumulator,currentRecord){
+                        return hoursAccumulator+currentRecord.howLong
+                    },0)
+                }
+                return total
+            },
+            totalHoursByType(){
+                let hoursByType={}
+                this.types.forEach(type=>{
+                    let totalForType=this.activityRecords
+                        .filter(function (record) {return record.type===type})
+                        .reduce(function(accumulator,current){return accumulator+current.howLong},0)
+                           hoursByType[type]=totalForType
+                        })
+                return hoursByType
+            }
+        },
+        methods: {
+            submit() {
+                this.errors = []
+
+                if (this.whenLocal == 'Invalid Date' || this.whenLocal.getTime() > new Date().getTime()) {
+                    this.errors.push('Select a valid date,today or in the past')
+                }
+                if (typeof (this.howLong) != "number" || this.howLong <= 0) {
+                    this.errors.push('The number of hours must be a number greater then zero.')
+                }
+
+
+
+                if (this.errors.length == 0) {
+                    let record = {
+                        when: this.whenLocal,
+                        howLong: this.howLong,
+                        type: this.type,
+                        digitalTraditional: this.digitalTraditional,
+                        doneWIP:this.doneWIP,
+                        notes:this.notes
+                    }
+                    this.activityRecords.push(record)
+                    this.activityRecords.sort(function (r1,r2) {
+                        return r1.when.getTime()-r2.when.getTime()
+                    })
+                }
+            }
+        },
+        filters: {
+            lowercase(text) {
+                return text.toLowerCase()
+            },
+            shortDateFormat(date) {
+                return new Intl.DateTimeFormat().format(date)
+            },
+            shortNotes(notes) {
+                if (notes.length > 40) {
+                    notes = notes.substring(0, 40) + '...';
+                }
+                return notes
+            },
+            decimalPlaces:function (howLong,decimalPlaces) {
+                return howLong.toFixed(decimalPlaces)
+            }
+        }
+    })
+</script>
 
 </body>
 
